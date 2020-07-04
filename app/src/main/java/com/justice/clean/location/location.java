@@ -77,17 +77,19 @@ public class location extends AppCompatActivity {
             if (location != null) {
                 //checkDistance(location);
             }
-            tw.setText(Integer.toString(loc_listen_ct++)+":loc changed");
+            tw.setText(Integer.toString(loc_listen_ct++)+":loc changed\nLongitude:");
+            tw.append(String.valueOf(location.getLongitude()));
+            tw.append("\nLatitude：");
+            tw.append(String.valueOf(location.getLatitude()));
         }
 
 
         public void onProviderDisabled(String provider) {
-            tw.setText(Integer.toString(loc_listen_ct++)+":prov disabled");
+            tw.setText(Integer.toString(loc_listen_ct++)+":prov disabled:"+provider);
         }
 
-        //  Provider被enable时触发此函数，比如GPS被打开
         public void onProviderEnabled(String provider) {
-            tw.setText(Integer.toString(loc_listen_ct++)+":prov enabled");
+            tw.setText(Integer.toString(loc_listen_ct++)+":prov enabled"+provider);
         }
 
 
@@ -129,7 +131,7 @@ public class location extends AppCompatActivity {
             provider = LocationManager.GPS_PROVIDER;
             if(checkPermission("android.permission.ACCESS_FINE_LOCATION", Binder.getCallingPid(),
                     Binder.getCallingUid()) == PackageManager.PERMISSION_GRANTED) {
-                lm.requestLocationUpdates(provider, 1000, 10, LocListener);
+                lm.requestLocationUpdates(provider, 1000, 1, LocListener);
             }
             else {
                 tw.setText("No permission!!!");
