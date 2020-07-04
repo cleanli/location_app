@@ -48,6 +48,8 @@ import android.widget.TextView;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -81,6 +83,10 @@ public class location extends AppCompatActivity {
             tw.append(String.valueOf(location.getLongitude()));
             tw.append("\nLatitude：");
             tw.append(String.valueOf(location.getLatitude()));
+            tw.append("\nAltitude:");
+            tw.append(String.valueOf(location.getAltitude()));
+            tw.append("\nTime:");
+            tw.append(""+getGpsLoaalTime(location.getTime()));
         }
 
 
@@ -98,6 +104,15 @@ public class location extends AppCompatActivity {
         }
     };
 
+    private static String getGpsLoaalTime(long gpsTime){
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.setTimeInMillis(gpsTime);
+        SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        String datestring = df.format(calendar.getTime());
+
+        return datestring;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
