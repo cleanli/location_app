@@ -1,7 +1,9 @@
 package com.justice.clean.location;
 
 import android.content.Context;
+import android.location.Location;
 import android.location.LocationManager;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -13,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.Manifest;
 import android.util.Log;
+import android.location.LocationListener;
 import android.content.pm.PackageManager;
 
 
@@ -57,13 +60,42 @@ public class location extends AppCompatActivity {
     private LocationManager lm;
     private Context mContext;
     private List<String> prodiverlist;
+    private TextView tw;
     //private PermissionsChecker mPermissionsChecker;
-    String[] perms = {
+    private String[] perms = {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.INTERNET,
             Manifest.permission.READ_PHONE_STATE
     };
+    private String provider = null;
+    private int loc_listen_ct = 0;
+    private final LocationListener LocListener = new LocationListener() {
+
+        public void onLocationChanged(Location location) {
+            // log it when the location changes
+            if (location != null) {
+                //checkDistance(location);
+            }
+            tw.setText(Integer.toString(loc_listen_ct++)+":loc changed");
+        }
+
+
+        public void onProviderDisabled(String provider) {
+            tw.setText(Integer.toString(loc_listen_ct++)+":prov disabled");
+        }
+
+        //  Provider被enable时触发此函数，比如GPS被打开
+        public void onProviderEnabled(String provider) {
+            tw.setText(Integer.toString(loc_listen_ct++)+":prov enabled");
+        }
+
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            tw.setText(Integer.toString(loc_listen_ct++)+":status changed");
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +114,7 @@ public class location extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        tw = (TextView) findViewById(R.id.text);
 
         String serviceString = Context.LOCATION_SERVICE;
         lm = (LocationManager) getSystemService(serviceString);
@@ -91,7 +124,17 @@ public class location extends AppCompatActivity {
         */
 
         prodiverlist = lm.getProviders(true);
-        String provider = LocationManager.GPS_PROVIDER;
+        tw.setText(prodiverlist.toString());
+        if(prodiverlist.contains(LocationManager.GPS_PROVIDER)) {
+            provider = LocationManager.GPS_PROVIDER;
+            if(checkPermission("android.permission.ACCESS_FINE_LOCATION", Binder.getCallingPid(),
+                    Binder.getCallingUid()) == PackageManager.PERMISSION_GRANTED) {
+                lm.requestLocationUpdates(provider, 1000, 10, LocListener);
+            }
+            else {
+                tw.setText("No permission!!!");
+            }
+        }
     }
 
     @Override
@@ -137,4 +180,11 @@ public class location extends AppCompatActivity {
         Log.i(TAG, "|||||||||||||||||||||||||||||||||||||||||||");
         Log.i(TAG, l);
     }
+
+    @Override
+    protected void onDestroy(){
+        lm.removeUpdates(LocListener);
+        super.onDestroy();
+    }
+
 }
